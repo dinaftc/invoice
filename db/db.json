@@ -1,0 +1,68 @@
+{
+  "invoices": [
+    {
+      "billerStreetAddress": "a",
+      "billerCity": "b",
+      "billerZipCode": "12345",
+      "billerCountry": "dz",
+      "clientName": "dina",
+      "clientEmail": "d.fettache@gmail.com",
+      "clientStreetAddress": "lll",
+      "clientCity": "ce",
+      "clientZipCode": "44333",
+      "clientCountry": "dz",
+      "invoiceDateUnix": 1698783168106,
+      "invoiceDate": "Oct 31, 2023",
+      "paymentDueDateUnix": 1701375199448,
+      "paymentDueDate": "Nov 30, 2023",
+      "paymentTerms": "30",
+      "productDescription": "eeeeeeeeeeeeeee",
+      "invoicePending": false,
+      "invoiceDraft": false,
+      "invoiceItemList": [
+        {
+          "id": "4a9c7670c53",
+          "itemName": "itm",
+          "qty": "7",
+          "price": "09",
+          "total": 63
+        }
+      ],
+      "invoiceTotal": 63,
+      "id": "a9c7670c53f",
+      "invoicePaid": true
+    },
+    {
+      "billerStreetAddress": "eeee",
+      "billerCity": "wewww",
+      "billerZipCode": "444",
+      "billerCountry": "dz",
+      "clientName": "dina",
+      "clientEmail": "d.fettache@gmail.com",
+      "clientStreetAddress": "seeee",
+      "clientCity": "ce",
+      "clientZipCode": "98765",
+      "clientCountry": "dz",
+      "invoiceDateUnix": 1698783548003,
+      "invoiceDate": "Oct 31, 2023",
+      "paymentDueDateUnix": 1701375572954,
+      "paymentDueDate": "Nov 30, 2023",
+      "paymentTerms": "30",
+      "productDescription": "eeeeeeeeeeeeeee",
+      "invoicePending": true,
+      "invoiceDraft": false,
+      "invoiceItemList": [
+        {
+          "id": "2d937e98644",
+          "itemName": "p",
+          "qty": "9",
+          "price": "099",
+          "total": 891
+        }
+      ],
+      "invoiceTotal": 891,
+      "id": "d937e986444",
+      "invoicePaid": false
+    }
+  ]
+}
