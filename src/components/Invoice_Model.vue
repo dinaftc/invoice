@@ -124,7 +124,7 @@
   
   
   <script setup>
-  import { ref, onMounted, computed, watch} from "vue";
+  import { ref, onMounted, computed, watch,reactive} from "vue";
   import { useInvoiceStore } from '../stores/counter';
   import {uid} from 'uid'
 
@@ -136,7 +136,7 @@ const invoiceWrap = ref(null);
   const TempinvoiceItemList=ref([])
     
   // Define your data properties using ref() and reactive()
-  const state = ref({
+  const state = reactive({
     billerStreetAddress: null,
     billerCity: null,
     billerZipCode: null,
@@ -148,9 +148,9 @@ const invoiceWrap = ref(null);
     clientZipCode: null,
     clientCountry: null,
     invoiceDateUnix: ref(Date.now()),
-    invoiceDate: null,
+    invoiceDate: computed(() => new Date(state.invoiceDateUnix).toLocaleDateString('en-us', dateOptions)),
     paymentDueDateUnix: ref(Date.now()),
-    paymentDueDate: null,
+    paymentDueDate: computed(() => new Date(state.paymentDueDateUnix).toLocaleDateString('en-us', dateOptions)),
     paymentTerms: 0,
     productDescription: null,
     invoicePending: null,
@@ -158,49 +158,68 @@ const invoiceWrap = ref(null);
     invoiceItemList: [],
     invoiceTotal: computed(() => {
       let total = 0;
-      state.value.invoiceItemList.forEach((item) => {
+      state.invoiceItemList.forEach((item) => {
         total += item.total;
       });
       return total;
     }),
   });
  
-onMounted(() => {
 
-  state.value=invoiceStore.invoiceToUpdate
-TempinvoiceItemList.value=state.value.invoiceItemList
-})
+  onMounted(() => {
+  const invoiceToUpdate = invoiceStore.invoiceToUpdate;
+  state.billerStreetAddress = invoiceToUpdate.billerStreetAddress;
+  state.billerCity = invoiceToUpdate.billerCity;
+  state.billerZipCode = invoiceToUpdate.billerZipCode;
+  state.billerCountry = invoiceToUpdate.billerCountry;
+  state.clientName = invoiceToUpdate.clientName;
+  state.clientEmail = invoiceToUpdate.clientEmail;
+  state.clientStreetAddress = invoiceToUpdate.clientStreetAddress;
+  state.clientCity = invoiceToUpdate.clientCity;
+  state.clientZipCode = invoiceToUpdate.clientZipCode;
+  state.clientCountry = invoiceToUpdate.clientCountry;
+  state.invoiceDateUnix = invoiceToUpdate.invoiceDateUnix;
+  state.paymentDueDateUnix = invoiceToUpdate.paymentDueDateUnix;
+  state.paymentTerms = invoiceToUpdate.paymentTerms;
+  state.productDescription = invoiceToUpdate.productDescription;
+  state.invoicePending = invoiceToUpdate.invoicePending;
+  state.invoiceDraft = invoiceToUpdate.invoiceDraft;
+  state.invoiceItemList = invoiceToUpdate.invoiceItemList;
+  TempinvoiceItemList.value=invoiceToUpdate.invoiceItemList;
+});
 
+
+// onmounted verifie if table>0 n7thoum f temp...
 const updateInvoice=async()=>{
-await invoiceStore.UPDATE_INVOICE(state.value.id)
+  
+await invoiceStore.UPDATE_INVOICE(invoiceStore.invoiceToUpdate.id,state)
 }
+
+
   function addDaysToCurrentDate(days) {
     const currentDate = new Date();
     currentDate.setDate(currentDate.getDate() + days);
     return currentDate.getTime(); // Return the Unix timestamp of the new date
   }
 
-  watch(() => state.value.paymentTerms, (newPaymentTerm) => {
+  watch(() => state.paymentTerms, (newPaymentTerm) => {
     // Update paymentDueDateUnix based on the selected payment term
-    if (newPaymentTerm === 30) {
-      state.value.paymentDueDateUnix = addDaysToCurrentDate(30);
+    if (newPaymentTerm === '30') {
+      state.paymentDueDateUnix = addDaysToCurrentDate(30);
       console.log('30')
-    } else if (newPaymentTerm === 60) {
-      state.value.paymentDueDateUnix = addDaysToCurrentDate(60);
+    } else if (newPaymentTerm === '60') {
+      state.paymentDueDateUnix = addDaysToCurrentDate(60);
     }
   });
   
-  watch(() => state.value.paymentDueDateUnix, () => {
+  watch(() => state.paymentDueDateUnix, () => {
     // Recompute paymentDueDate whenever paymentDueDateUnix changes
-    state.value.paymentDueDate = computed(() => new Date(state.value.paymentDueDateUnix).toLocaleDateString('en-us', dateOptions));
+    state.paymentDueDate = computed(() => new Date(state.paymentDueDateUnix).toLocaleDateString('en-us', dateOptions));
   });
   
   const closeInvoice = () => {
     invoiceStore.TOGGLE_INVOICE();
   };
-
-  
-
 const addNewInvoiceItem = ()=>{
   let item={
 id:uid(),
@@ -213,22 +232,22 @@ TempinvoiceItemList.value.push(item)
 
   }
 const deleteInvoiceItem = (idToDelete) => {
-state.value.invoiceItemList = state.value.invoiceItemList.filter((item) => item.id !== idToDelete);
+state.invoiceItemList = state.invoiceItemList.filter((item) => item.id !== idToDelete);
 };
 
 const publishInvoice = ()=>{
-state.value.invoicePending = true
+state.invoicePending = true
 }
 const saveDraft = ()=>{
-state.value.invoiceDraft = true
+state.invoiceDraft = true
 }
 const uploadInvoice = async () => {
-  if (state.value.invoiceItemList.length <= 0) {
+  state.invoiceItemList=TempinvoiceItemList
+  if (state.invoiceItemList.length <= 0) {
     alert('Fill out work items');
     return;
   }
   try {
-    state.value.invoiceItemList=TempinvoiceItemList
     loading.value=true
     if (invoiceStore.editInvoice){
       Object.assign(invoiceStore.invoiceToUpdate, state)
@@ -250,7 +269,6 @@ uploadInvoice();
 
 const checkClick = (e) => {
   const formElement = document.querySelector('.invoice-content'); // Adjust the selector as needed
-
   if (invoiceWrap.value && invoiceWrap.value.contains(e.target)) {
     // Check if the click is inside invoiceWrap
     if (!formElement.contains(e.target)) {

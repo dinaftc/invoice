@@ -6,16 +6,16 @@
 <span>There are {{invoiceStore.invoiceData.length}} invoices</span>
       </div>
       <div class="right flex ">
-     <div class="filter flex" ref="filter" @click="toggleFilterMenu">
-      <span>Filter by status</span>
-      <img src="@/assets/icon-arrow-down.svg" alt="">
-      <ul class="filter-menu" v-show="filterMenu">
-<li>Draft</li>
-<li>Pending</li>
-<li>Paid</li>
-<li>Clear</li>
-      </ul>
-     </div> 
+        <div class="filter flex" ref="filter" @click="toggleFilterMenu">
+          <span>Filter by status <span v-if="filteredInvoice !== null">: {{filteredInvoice}}</span></span>
+          <img src="@/assets/icon-arrow-down.svg" alt="">
+          <ul class="filter-menu" v-show="filterMenu">
+            <li @click="filteredInvoices('Draft')">Draft</li>
+            <li @click="filteredInvoices('Pending')">Pending</li>
+            <li @click="filteredInvoices('Paid')">Paid</li>
+            <li @click="filteredInvoices('Clear')">Clear</li>
+          </ul>
+        </div>
     <div class="button flex" @click="menuInvoice">
 <div class="inner-button flex">
   <img src="@/assets/icon-plus.svg" alt="">
@@ -36,18 +36,48 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref,watch } from 'vue';
 import { useInvoiceStore } from '../stores/counter';
-import Invoice from '../components/Invoice.vue'
-const invoiceStore=useInvoiceStore();
+import Invoice from '../components/Invoice.vue';
+const invoiceStore = useInvoiceStore();
+const filteredInvoice = ref(null);
+const filterMenu = ref(false);
+
+const getFilteredInvoices = (field) => {
+  let filteredInvoices = [];
+  if (field === 'Draft') {
+    filteredInvoices = invoiceStore.invoiceData.filter(invoice => invoice.invoiceDraft === true && !invoice.invoicePending && !invoice.invoicePaid);
+  } else if (field === 'Pending') {
+    filteredInvoices = invoiceStore.invoiceData.filter(invoice => invoice.invoicePending === true && !invoice.invoiceDraft && !invoice.invoicePaid);
+  } else if (field === 'Paid') {
+    filteredInvoices = invoiceStore.invoiceData.filter(invoice => invoice.invoicePaid === true && !invoice.invoiceDraft && !invoice.invoicePending);
+  } else {
+    filteredInvoices = [...invoiceStore.invoiceData];
+  }
+
+  invoiceStore.invoiceData = filteredInvoices; // Update the data with the filtered result
+};
+
+const filteredInvoices = (field) => {
+  if (field === 'Clear') {
+    filteredInvoice.value = null;
+  } else {
+    filteredInvoice.value = field;
+  }
+  getFilteredInvoices(field);
+};
+watch(filteredInvoice, (newFilteredInvoice) => {
+  // The watch function now triggers when filteredInvoice changes
+  getFilteredInvoices(newFilteredInvoice);
+});
+
 const menuInvoice = () => {
   invoiceStore.TOGGLE_INVOICE();
 };
-const filterMenu=ref(false)
-const toggleFilterMenu = () => {
-      filterMenu.value=!filterMenu.value
-    };
 
+const toggleFilterMenu = () => {
+  filterMenu.value = !filterMenu.value;
+};
 </script>
 <style lang="scss" scoped>
 .home {

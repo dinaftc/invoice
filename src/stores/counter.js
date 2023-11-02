@@ -16,7 +16,7 @@ const TOGGLE_INVOICE =() =>{
       invoiceModal.value = !invoiceModal.value;
     }
     const TOGGLE_EDIT_INVOICE =() =>{
-      editInvoice.value = !editInvoice.value;
+      editInvoice.value = true;
     }
 
 const TOGGLE_MODAL=() =>{
@@ -45,12 +45,12 @@ const  ADD_INVOICE=async ()=> {
       invoiceToUpdate.value=response.data
       };
     
-const UPDATE_INVOICE = async (id)=>{
-  let response = await axios.post(`/invoices/${id}`, invoiceToUpdate)
+const UPDATE_INVOICE = async (id,invoiceUpdate)=>{
+  let response = await axios.patch(`/invoices/${id}`, invoiceUpdate)
   intiStore(invoiceToUpdate)
-      router.push({ name: 'home' })
-      console.log(response)
-      GET_INVOICES()
+  console.log(response)
+  getInvoiceById(id)
+  editInvoice.value =false
 }
     const intiStore = (intialVariable) => {
       intialVariable.value={}
